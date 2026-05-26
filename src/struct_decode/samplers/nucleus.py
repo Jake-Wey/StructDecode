@@ -101,3 +101,55 @@ class NucleusSample(BaseSampler):
         if self.top_k is not None:
             parts.append(f"top_k={self.top_k}")
         return f"nucleus({', '.join(parts)})"
+    
+
+class TopKSampler(BaseSampler):
+    """
+    Top-K sampling: sample from the K most likely tokens.
+    """
+
+    def __init__(self, top_k: int = 50, temperature: float = 1.0):
+        """
+        Initialize top-k sampler.
+
+        Args:
+            top_k: Number of top tokens to sample from. Default: 50
+            temperature: Sampling temperature. Default: 1.0
+        """
+
+        if top_k <= 0:
+            raise ValueError(f"top_k must be > 0, got {top_k}")
+        if temperature <= 0:
+            raise ValueError(f"temperature must be > 0, got {temperature}")
+        
+        self.top_k = top_k
+        self.temperature = temperature
+
+    def sample(self, logits: torch.Tensor) -> torch.Tensor:
+        """
+        Sample from the top-k tokens.
+
+        Args:
+            logits: Shape (batch_size, vocab_size)
+
+        Returns:
+            Token IDs with shape (batch_size,)
+        """
+        
+        if self.temperature != 1.0:
+            logits = logits / self.temperature
+
+        top_k = min(self.top_k, logits.shape[-1])
+        top_k_logits, top_k_indices = torch.topk(logits, top_k, dim=-1)
+
+        top_k_probs = F.softmax(top_k_logits, dim=-1)
+
+        sampled_indices = torch.multinomial(top_k_probs, num_samples=1).squeeze(-1)
+
+        next_tokens = top_k_indices.gather(dim=-1, index=sampled_indices.unsqueeze(-1)).squeeze(-1)
+
+        return next_tokens
+    
+    @property
+    def name(self) -> str:
+        return f"top_k(k={self.top_k}, temperature={self.temperature})"
