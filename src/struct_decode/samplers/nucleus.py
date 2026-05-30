@@ -7,7 +7,7 @@ import torch.nn.functional as F
 
 from struct_decode.samplers.base import BaseSampler
 
-class NucleusSample(BaseSampler):
+class NucleusSampler(BaseSampler):
     """
     Nucleus sampling (also known as Top-p sampling).
 

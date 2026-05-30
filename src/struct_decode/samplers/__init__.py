@@ -2,6 +2,6 @@
 
 from struct_decode.samplers.base import BaseSampler
 from struct_decode.samplers.greedy import GreedySampler
-from struct_decode.samplers.nucleus import NucleusSample
+from struct_decode.samplers.nucleus import NucleusSampler
 
-__all__ = ["BaseSampler", "GreedySampler", "NucleusSample"]
+__all__ = ["BaseSampler", "GreedySampler", "NucleusSampler"]
